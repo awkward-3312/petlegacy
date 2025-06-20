@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import {
   FaBars,
@@ -13,16 +13,28 @@ import {
   FaUserPlus,
   FaSignOutAlt,
 } from "react-icons/fa";
+import {
+  Box,
+  Flex,
+  Icon,
+  IconButton,
+  Stack,
+  HStack,
+  Text,
+  Button,
+  useColorModeValue,
+  Collapse,
+} from "@chakra-ui/react";
 
 export default function Navbar() {
   const [usuario, setUsuario] = useState(null);
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  // Sesión actual + listener
+  /* --------- sesión --------- */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUsuario(data.user));
-    supabase.auth.onAuthStateChange((_evt, sess) =>
-      setUsuario(sess?.user || null),
+    supabase.auth.onAuthStateChange((_e, sess) =>
+      setUsuario(sess?.user || null)
     );
   }, []);
 
@@ -32,76 +44,143 @@ export default function Navbar() {
     setMenuAbierto(false);
   };
 
-  /* ---------- UI ---------- */
+  /* --------- UI --------- */
+  const bg = useColorModeValue("whiteAlpha.800", "gray.800");
+  const linkHover = useColorModeValue("purple.50", "gray.700");
+
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 backdrop-blur-xs bg-white/60 dark:bg-brand-dark/60 shadow-glass ring-1 ring-black/5 dark:ring-white/10 text-brand-dark dark:text-white transition-colors">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 flex h-16 items-center justify-between">
+    <Box
+      position="fixed"
+      top="0"
+      w="full"
+      zIndex="banner"
+      backdropFilter="blur(6px)"
+      bg={bg}
+      borderBottom="1px solid"
+      borderColor={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+    >
+      <Flex
+        maxW="7xl"
+        mx="auto"
+        px={{ base: 4, md: 8 }}
+        h="16"
+        align="center"
+        justify="space-between"
+      >
         {/* Logo */}
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-xl font-bold hover:opacity-90"
-        >
-          <FaPaw className="text-pastel-peach text-2xl" />
-          <span className="hidden sm:block">PetLegacy</span>
-        </Link>
+        <HStack as={RouterLink} to="/" spacing={2}>
+          <Icon as={FaPaw} boxSize={6} color="pink.300" />
+          <Text
+            fontWeight="bold"
+            fontSize="xl"
+            display={{ base: "none", sm: "block" }}
+          >
+            PetLegacy
+          </Text>
+        </HStack>
 
-        {/*Hamburger*/}
-        <button
-          onClick={() => setMenuAbierto(!menuAbierto)}
-          className="sm:hidden p-2 rounded-lg hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink"
+        {/* Hamburguesa */}
+        <IconButton
           aria-label="Menú"
-        >
-          {menuAbierto ? <FaTimes size={18} /> : <FaBars size={18} />}
-        </button>
+          icon={menuAbierto ? <FaTimes /> : <FaBars />}
+          display={{ base: "flex", sm: "none" }}
+          variant="ghost"
+          onClick={() => setMenuAbierto(!menuAbierto)}
+        />
 
-        {/*Links*/}
-        <div
-          className={`${
-            menuAbierto ? "flex" : "hidden"
-          } sm:flex flex-col sm:flex-row gap-2 sm:gap-4 absolute sm:static top-full left-0 w-full sm:w-auto bg-white/90 dark:bg-brand-dark/90 sm:bg-transparent sm:dark:bg-transparent p-4 sm:p-0`}
-          onClick={() => setMenuAbierto(false)}
+        {/* Links desktop */}
+        <HStack
+          spacing={4}
+          display={{ base: "none", sm: "flex" }}
+          align="center"
         >
-          <NavItem to="/" icon={<FaHome />} text="Inicio" />
-          <NavItem to="/perfil" icon={<FaDog />} text="Perfil Mascota" />
-          <NavItem to="/memorial" icon={<FaBook />} text="Memorial" />
+          <NavItem to="/" icon={FaHome} text="Inicio" hover={linkHover} />
+          <NavItem to="/perfil" icon={FaDog} text="Perfil Mascota" hover={linkHover} />
+          <NavItem to="/memorial" icon={FaBook} text="Memorial" hover={linkHover} />
 
           {usuario ? (
             <>
-              <span className="flex items-center gap-1 text-xs sm:text-sm px-3 py-2 rounded">
-                <FaUserCircle />{" "}
-                <span className="hidden sm:inline">{usuario.email}</span>
-              </span>
-              <button
+              <HStack spacing={1} fontSize="sm">
+                <Icon as={FaUserCircle} />
+                <Text whiteSpace="nowrap">{usuario.email}</Text>
+              </HStack>
+              <Button
+                size="sm"
+                leftIcon={<FaSignOutAlt />}
                 onClick={cerrarSesion}
-                className="flex items-center gap-1 px-3 py-2 rounded hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink"
+                variant="ghost"
+                _hover={{ bg: linkHover }}
               >
-                <FaSignOutAlt /> Cerrar sesión
-              </button>
+                Cerrar sesión
+              </Button>
             </>
           ) : (
             <>
-              <NavItem to="/login" icon={<FaSignInAlt />} text="Iniciar sesión" />
-              <NavItem
-                to="/registro"
-                icon={<FaUserPlus />}
-                text="Registrarse"
-              />
+              <NavItem to="/login" icon={FaSignInAlt} text="Iniciar sesión" hover={linkHover} />
+              <NavItem to="/registro" icon={FaUserPlus} text="Registrarse" hover={linkHover} />
             </>
           )}
-        </div>
-      </div>
-    </nav>
+        </HStack>
+      </Flex>
+
+      {/* Links móviles */}
+      <Collapse in={menuAbierto} animateOpacity>
+        <Stack
+          bg={bg}
+          p={4}
+          display={{ sm: "none" }}
+          spacing={2}
+          borderBottom="1px solid"
+          borderColor={useColorModeValue("blackAlpha.200", "whiteAlpha.200")}
+        >
+          <NavItem to="/" icon={FaHome} text="Inicio" hover={linkHover} mobile />
+          <NavItem to="/perfil" icon={FaDog} text="Perfil Mascota" hover={linkHover} mobile />
+          <NavItem to="/memorial" icon={FaBook} text="Memorial" hover={linkHover} mobile />
+
+          {usuario ? (
+            <>
+              <HStack spacing={1} fontSize="sm">
+                <Icon as={FaUserCircle} />
+                <Text>{usuario.email}</Text>
+              </HStack>
+              <Button
+                size="sm"
+                leftIcon={<FaSignOutAlt />}
+                onClick={cerrarSesion}
+                variant="ghost"
+                _hover={{ bg: linkHover }}
+              >
+                Cerrar sesión
+              </Button>
+            </>
+          ) : (
+            <>
+              <NavItem to="/login" icon={FaSignInAlt} text="Iniciar sesión" hover={linkHover} mobile />
+              <NavItem to="/registro" icon={FaUserPlus} text="Registrarse" hover={linkHover} mobile />
+            </>
+          )}
+        </Stack>
+      </Collapse>
+    </Box>
   );
 }
 
-/* ---------- Sub-componente ---------- */
-function NavItem({ to, icon, text }) {
+/* ---------- Link reutilizable ---------- */
+function NavItem({ to, icon, text, hover, mobile = false }) {
+  const Component = mobile ? Stack : HStack;
   return (
-    <Link
+    <Component
+      as={RouterLink}
       to={to}
-      className="flex items-center gap-1 px-3 py-2 rounded hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink transition-colors text-sm"
+      spacing={1}
+      px={3}
+      py={2}
+      borderRadius="md"
+      _hover={{ bg: hover }}
+      fontSize="sm"
     >
-      {icon} <span>{text}</span>
-    </Link>
+      <Icon as={icon} />
+      <Text>{text}</Text>
+    </Component>
   );
 }
