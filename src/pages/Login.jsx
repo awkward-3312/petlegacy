@@ -11,7 +11,11 @@ export default function Login() {
   const manejarLogin = async (e) => {
     e.preventDefault();
 
+<<<<<<< Updated upstream
     const { data: _data, error } = await supabase.auth.signInWithPassword({
+=======
+    const { error } = await supabase.auth.signInWithPassword({
+>>>>>>> Stashed changes
       email,
       password,
     });
