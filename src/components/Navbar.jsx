@@ -45,7 +45,7 @@ export default function Navbar() {
           <span className="hidden sm:block">PetLegacy</span>
         </Link>
 
-        {/* Hamburger */}
+        {/*Hamburger*/}
         <button
           onClick={() => setMenuAbierto(!menuAbierto)}
           className="sm:hidden p-2 rounded-lg hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink"
@@ -54,7 +54,7 @@ export default function Navbar() {
           {menuAbierto ? <FaTimes size={18} /> : <FaBars size={18} />}
         </button>
 
-        {/* Links */}
+        {/*Links*/}
         <div
           className={`${
             menuAbierto ? "flex" : "hidden"
