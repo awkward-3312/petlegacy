@@ -1,24 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import PerfilMascota from "./pages/PerfilMascota";
-import Memorial from "./pages/Memorial";
-import NotFound from "./pages/NotFound";
-import Registro from "./pages/Registro";
-import Login from "./pages/Login";
+import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 
 export default function App() {
+  const { toggleColorMode } = useColorMode();
+  const bg = useColorModeValue("gray.100", "gray.900");
+  const color = useColorModeValue("black", "white");
+
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/perfil" element={<PerfilMascota />} />
-        <Route path="/memorial" element={<Memorial />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="/registro" element={<Registro />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </BrowserRouter>
+    <Box minH="100vh" bg={bg} color={color} p={10}>
+      <Heading mb={4}>PetLegacy</Heading>
+      <Text fontSize="xl">¡Bienvenido a tu red social de mascotas!</Text>
+      <Button mt={4} onClick={toggleColorMode}>
+        Cambiar modo
+      </Button>
+    </Box>
   );
 }
