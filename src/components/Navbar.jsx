@@ -18,104 +18,90 @@ export default function Navbar() {
   const [usuario, setUsuario] = useState(null);
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  // Obtener usuario actual al cargar el componente
+  // Sesión actual + listener
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUsuario(data.user);
-    });
-
-    // Escuchar cambios de sesión
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user || null);
-    });
+    supabase.auth.getUser().then(({ data }) => setUsuario(data.user));
+    supabase.auth.onAuthStateChange((_evt, sess) =>
+      setUsuario(sess?.user || null),
+    );
   }, []);
 
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
     setUsuario(null);
+    setMenuAbierto(false);
   };
 
+  /* ---------- UI ---------- */
   return (
-    <nav className="backdrop-blur-md bg-white/70 dark:bg-gray-800/70 shadow-lg ring-1 ring-black/5 dark:ring-white/10 fixed top-0 inset-x-0 z-50 text-gray-800 dark:text-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="flex items-center text-xl font-bold px-3 py-2 rounded-md hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors">
-            <FaPaw className="mr-2 text-purple-600" />
-            <span className="hidden sm:block">PetLegacy</span>
-          </Link>
+    <nav className="fixed inset-x-0 top-0 z-50 backdrop-blur-xs bg-white/60 dark:bg-brand-dark/60 shadow-glass ring-1 ring-black/5 dark:ring-white/10 text-brand-dark dark:text-white transition-colors">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-xl font-bold hover:opacity-90"
+        >
+          <FaPaw className="text-pastel-peach text-2xl" />
+          <span className="hidden sm:block">PetLegacy</span>
+        </Link>
 
-          <button
-            onClick={() => setMenuAbierto(!menuAbierto)}
-            className="sm:hidden p-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
-            aria-label="Menú"
-          >
-            {menuAbierto ? <FaTimes /> : <FaBars />}
-          </button>
+        {/* Hamburger */}
+        <button
+          onClick={() => setMenuAbierto(!menuAbierto)}
+          className="sm:hidden p-2 rounded-lg hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink"
+          aria-label="Menú"
+        >
+          {menuAbierto ? <FaTimes size={18} /> : <FaBars size={18} />}
+        </button>
 
-          <div
-            className={`${
-              menuAbierto ? "flex" : "hidden"
-            } flex-col absolute sm:static top-full left-0 w-full sm:w-auto bg-white/90 dark:bg-gray-900/90 sm:bg-transparent sm:dark:bg-transparent sm:flex sm:flex-row items-center gap-2 sm:gap-4 p-4 sm:p-0 transition-all`}
-          >
-            <Link
-              to="/"
-              className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-              onClick={() => setMenuAbierto(false)}
-            >
-              <FaHome className="mr-1" /> Inicio
-            </Link>
-            <Link
-              to="/perfil"
-              className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-              onClick={() => setMenuAbierto(false)}
-            >
-              <FaDog className="mr-1" /> Perfil Mascota
-            </Link>
-            <Link
-              to="/memorial"
-              className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-              onClick={() => setMenuAbierto(false)}
-            >
-              <FaBook className="mr-1" /> Memorial
-            </Link>
+        {/* Links */}
+        <div
+          className={`${
+            menuAbierto ? "flex" : "hidden"
+          } sm:flex flex-col sm:flex-row gap-2 sm:gap-4 absolute sm:static top-full left-0 w-full sm:w-auto bg-white/90 dark:bg-brand-dark/90 sm:bg-transparent sm:dark:bg-transparent p-4 sm:p-0`}
+          onClick={() => setMenuAbierto(false)}
+        >
+          <NavItem to="/" icon={<FaHome />} text="Inicio" />
+          <NavItem to="/perfil" icon={<FaDog />} text="Perfil Mascota" />
+          <NavItem to="/memorial" icon={<FaBook />} text="Memorial" />
 
-            {usuario ? (
-              <>
-                <span className="px-3 py-2 rounded-md text-xs flex items-center">
-                  <FaUserCircle className="mr-1" />
-                  <span className="hidden sm:block">{usuario.email}</span>
-                </span>
-                <button
-                  onClick={() => {
-                    setMenuAbierto(false);
-                    cerrarSesion();
-                  }}
-                  className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-                >
-                  <FaSignOutAlt className="mr-1" /> Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-                  onClick={() => setMenuAbierto(false)}
-                >
-                  <FaSignInAlt className="mr-1" /> Iniciar sesión
-                </Link>
-                <Link
-                  to="/registro"
-                  className="px-3 py-2 rounded-md text-sm font-medium flex items-center hover:bg-purple-100 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 transition-colors"
-                  onClick={() => setMenuAbierto(false)}
-                >
-                  <FaUserPlus className="mr-1" /> Registrarse
-                </Link>
-              </>
-            )}
-          </div>
+          {usuario ? (
+            <>
+              <span className="flex items-center gap-1 text-xs sm:text-sm px-3 py-2 rounded">
+                <FaUserCircle />{" "}
+                <span className="hidden sm:inline">{usuario.email}</span>
+              </span>
+              <button
+                onClick={cerrarSesion}
+                className="flex items-center gap-1 px-3 py-2 rounded hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink"
+              >
+                <FaSignOutAlt /> Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <>
+              <NavItem to="/login" icon={<FaSignInAlt />} text="Iniciar sesión" />
+              <NavItem
+                to="/registro"
+                icon={<FaUserPlus />}
+                text="Registrarse"
+              />
+            </>
+          )}
         </div>
       </div>
     </nav>
+  );
+}
+
+/* ---------- Sub-componente ---------- */
+function NavItem({ to, icon, text }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-1 px-3 py-2 rounded hover:bg-pastel-pink/40 focus:ring-2 focus:ring-pastel-pink transition-colors text-sm"
+    >
+      {icon} <span>{text}</span>
+    </Link>
   );
 }
